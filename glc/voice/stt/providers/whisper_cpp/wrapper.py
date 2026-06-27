@@ -18,6 +18,9 @@ from pathlib import Path
 MODEL_DIR = Path(os.path.expanduser(os.getenv("GLC_WHISPER_MODEL_DIR", "~/.glc/models/whisper-base")))
 MODEL_FILE = MODEL_DIR / "ggml-base.bin"
 
+# VAD threshold for whisper-cli; default speech-probability cut.
+VAD_THRESHOLD = 0.6
+
 
 def run_whisper_cpp(audio: bytes, mime: str, use_vad: bool = False) -> tuple[str, str, int]:
     cli = shutil.which("whisper-cli") or shutil.which("whisper.cpp")
@@ -43,7 +46,7 @@ def run_whisper_cpp(audio: bytes, mime: str, use_vad: bool = False) -> tuple[str
         # Check whisper-cli --help to be sure. We append the flag here.
         if use_vad:
             cmd.append("-vth")
-            cmd.append("0.6") # Default threshold, adjust if necessary
+            cmd.append(str(VAD_THRESHOLD))
         
         out = subprocess.run(
             cmd,
